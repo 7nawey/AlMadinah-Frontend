@@ -1,0 +1,184 @@
+<div class="order-container" [dir]="i18n.lang === 'ar' ? 'rtl' : 'ltr'">
+  <h4 class="mb-3">
+    {{ i18n.lang === 'ar' ? 'إنشاء طلب / فاتورة جديدة' : 'Create New Order / Invoice' }}
+  </h4>
+
+  <!-- Success State -->
+  <div *ngIf="success" class="text-center py-4">
+    <div class="mb-3 text-success" style="font-size: 3rem;"><i class="bi bi-check-circle-fill"></i></div>
+    <h5 class="text-success">{{ i18n.lang === 'ar' ? 'تم تأكيد الطلب بنجاح!' : 'Order confirmed successfully!' }}</h5>
+    <div class="mt-3">
+      <button class="btn btn-modern btn-modern-primary" (click)="printInvoice()">{{ i18n.lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice' }}</button>
+      <button class="btn btn-modern btn-modern-secondary ms-2" (click)="reset()">{{ i18n.lang === 'ar' ? 'طلب جديد' : 'New Order' }}</button>
+    </div>
+  </div>
+
+  <div *ngIf="!success" class="row g-4">
+    <!-- Left: Invoice Panel -->
+    <div class="col-lg-7">
+      <div class="invoice-card card-modern">
+        <div class="card-header" style="background: linear-gradient(135deg, #1e293b, #334155); color: #fff; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+          <h5 class="mb-0">{{ i18n.lang === 'ar' ? 'الفاتورة' : 'Invoice' }}</h5>
+        </div>
+        <div class="card-body">
+          <!-- Invoice Items -->
+          <div class="table-responsive" *ngIf="orderItems.length">
+            <table class="table-sm table-modern mb-0">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</th>
+                  <th>{{ i18n.lang === 'ar' ? 'الكمية' : 'Qty' }}</th>
+                  <th>{{ i18n.lang === 'ar' ? 'السعر' : 'Price' }}</th>
+                  <th>{{ i18n.lang === 'ar' ? 'الإجمالي' : 'Total' }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of orderItems; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img *ngIf="item.productImage" [src]="'https://localhost:7178' + item.productImage" class="item-img" alt="">
+                      <span>{{ item.productName }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-1">
+                      <button class="btn btn-xs btn-modern btn-modern-secondary" (click)="changeQty(i, -1)">−</button>
+                      <span class="fw-bold px-2">{{ item.quantity }}</span>
+                      <button class="btn btn-xs btn-modern btn-modern-secondary" (click)="changeQty(i, 1)">+</button>
+                    </div>
+                  </td>
+                  <td>{{ item.unitPrice }} EGP</td>
+                  <td class="fw-bold">{{ item.totalPrice }} EGP</td>
+                  <td>
+                    <button class="btn btn-xs btn-modern btn-modern-danger" (click)="removeItem(i)">×</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!orderItems.length" class="text-center text-muted py-4">
+            <p>{{ i18n.lang === 'ar' ? 'اضغط على منتج لإضافته للفاتورة' : 'Click a product to add to invoice' }}</p>
+          </div>
+
+          <hr *ngIf="orderItems.length">
+
+          <!-- Totals -->
+          <div class="d-flex justify-content-between fw-bold" *ngIf="orderItems.length">
+            <span>{{ i18n.lang === 'ar' ? 'المجموع:' : 'Subtotal:' }}</span>
+            <span>{{ subtotal }} EGP</span>
+          </div>
+          <div class="d-flex justify-content-between text-muted" *ngIf="orderItems.length">
+            <span>{{ i18n.lang === 'ar' ? 'التوصيل:' : 'Delivery:' }}</span>
+            <span>{{ deliveryFee }} EGP</span>
+          </div>
+          <div class="d-flex justify-content-between fs-5 fw-bold text-primary" *ngIf="orderItems.length">
+            <span>{{ i18n.lang === 'ar' ? 'الإجمالي:' : 'Total:' }}</span>
+            <span>{{ total }} EGP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="card-modern mt-3">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الهاتف' : 'Phone' }}</label>
+              <input type="tel" class="form-control form-control-modern" [(ngModel)]="customerPhone" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'العنوان' : 'Address' }}</label>
+              <input class="form-control form-control-modern" [(ngModel)]="customerAddress" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'رسوم التوصيل' : 'Delivery Fee' }}</label>
+              <input type="number" class="form-control form-control-modern" [(ngModel)]="deliveryFee" />
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'ملاحظات' : 'Notes' }}</label>
+              <textarea class="form-control form-control-modern" rows="2" [(ngModel)]="notes"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-modern btn-modern-success btn-lg" (click)="confirmOrder()" [disabled]="loading || !orderItems.length">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ i18n.lang === 'ar' ? 'تأكيد الطلب' : 'Confirm Order' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Product Selection Panel -->
+    <div class="col-lg-5">
+      <!-- Barcode Scan -->
+      <div class="card-modern mb-3">
+        <div class="card-body">
+          <label class="form-label fw-bold text-danger">{{ i18n.lang === 'ar' ? 'مسح الباركود (Scanner)' : 'Barcode Scan' }}</label>
+          <input
+            type="text"
+            class="form-control form-control-modern barcode-input"
+            [(ngModel)]="barcodeScan"
+            (change)="onBarcodeScan($event)"
+            [placeholder]="i18n.lang === 'ar' ? 'امسح الباركود هنا...' : 'Scan barcode here...'"
+            autofocus
+          />
+        </div>
+      </div>
+
+      <!-- Product Search -->
+      <div class="card-modern mb-3">
+        <div class="card-body">
+          <label class="form-label fw-bold">{{ i18n.lang === 'ar' ? 'بحث بالمنتج' : 'Search Product' }}</label>
+          <div class="position-relative">
+            <input
+              type="text"
+              class="form-control form-control-modern"
+              [(ngModel)]="productSearch"
+              (input)="onProductSearch()"
+              [placeholder]="i18n.lang === 'ar' ? 'اكتب اسم المنتج أو الباركود...' : 'Type product name or barcode...'"
+            />
+            <!-- Dropdown results -->
+            <div class="product-dropdown" *ngIf="showProductPicker && filteredProducts.length">
+              <div
+                class="product-dropdown-item"
+                *ngFor="let p of filteredProducts"
+                (click)="selectProduct(p)"
+              >
+                <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" class="dropdown-img" alt="">
+                <div class="dropdown-info">
+                  <div class="fw-bold">{{ i18n.lang === 'en' ? (p.nameEn || p.nameAr) : p.nameAr }}</div>
+                  <div class="text-muted small">{{ p.barcode }} — {{ p.price }} EGP</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Products Grid -->
+      <div class="card-modern">
+        <div class="card-header">
+          <h6 class="mb-0">{{ i18n.lang === 'ar' ? 'كل المنتجات' : 'All Products' }}</h6>
+        </div>
+        <div class="card-body">
+          <div class="product-picker-grid">
+            <div
+              class="product-picker-item"
+              *ngFor="let p of products"
+              (click)="addToOrder(p)"
+            >
+              <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" class="picker-img" alt="">
+              <div class="picker-name">{{ i18n.lang === 'en' ? (p.nameEn || p.nameAr) : p.nameAr }}</div>
+              <div class="picker-price">{{ p.price }} EGP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

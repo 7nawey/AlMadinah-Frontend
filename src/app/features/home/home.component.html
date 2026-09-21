@@ -1,0 +1,226 @@
+<!-- Hero Section -->
+<div class="hero-premium" *ngIf="categories.length">
+  <div class="hero-floating-shapes">
+    <div class="hero-shape hero-shape-1 animate-float"></div>
+    <div class="hero-shape hero-shape-2 animate-float-delayed"></div>
+    <div class="hero-shape hero-shape-3 animate-pulse-soft"></div>
+    <div class="hero-shape hero-shape-4 animate-pulse-soft" style="animation-delay:1.5s"></div>
+  </div>
+
+  <div class="hero-glass-card">
+    <h1 class="hero-title-premium">{{ i18n.lang === 'ar' ? 'المدينة المنورة' : 'Al-Madinah Al-Munawwarah' }}</h1>
+    <p class="hero-subtitle-premium">{{ i18n.lang === 'ar' ? 'كل احتياجاتك في مكان واحد — تسوق بسهولة وثقة' : 'Everything you need in one place — shop with ease and confidence' }}</p>
+    <div class="hero-cta-row">
+      <a routerLink="/checkout" class="hero-cta-btn hero-cta-primary">
+        <i class="bi bi-cart3"></i>
+        {{ i18n.lang === 'ar' ? 'تسوق الآن' : 'Shop Now' }}
+      </a>
+      <a routerLink="/" fragment="categories" class="hero-cta-btn hero-cta-secondary">
+        <i class="bi bi-grid-3x3-gap"></i>
+        {{ i18n.lang === 'ar' ? 'تصفح الفئات' : 'Browse Categories' }}
+      </a>
+    </div>
+    <div class="hero-decor-icons">
+      <i class="bi bi-box-seam"></i>
+      <i class="bi bi-truck"></i>
+      <i class="bi bi-shield-check"></i>
+      <i class="bi bi-star-fill"></i>
+    </div>
+  </div>
+
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0 40C240 80 480 0 720 40C960 80 1200 0 1440 40V80H0V40Z" fill="var(--bg, #f8fafc)"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Categories Section -->
+<section class="container section-wrapper">
+  <div class="section-header">
+    <h2 class="section-title">{{ i18n.t('categories') }}</h2>
+    <span class="section-count">{{ categories.length }}</span>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loadingCategories && categories.length === 0" class="categories-grid">
+    <div *ngFor="let _ of [].constructor(8)" class="category-skeleton">
+      <div class="skeleton-circle"></div>
+      <div class="skeleton-text"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loadingCategories && (!categories || categories.length === 0) && !categoriesError" class="empty-state">
+    <i class="bi bi-folder2-open"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد فئات.' : 'No categories.' }}</p>
+  </div>
+  <div *ngIf="!loadingCategories && categoriesError" class="alert alert-danger text-center">
+    {{ i18n.lang === 'ar' ? 'فشل تحميل الفئات.' : 'Failed to load categories.' }}
+    <button class="btn btn-sm btn-outline-danger ms-2" (click)="loadCategories(true)">{{ i18n.t('retry') }}</button>
+  </div>
+
+  <!-- Categories Grid -->
+  <div *ngIf="categories.length" class="categories-grid">
+    <div class="category-item" *ngFor="let cat of categories; trackBy: trackByCategory" (click)="selectCategory(cat.id)">
+      <div class="category-image">
+        <img *ngIf="cat.imageUrl" [src]="'https://localhost:7178' + cat.imageUrl" alt="">
+        <i *ngIf="!cat.imageUrl" class="bi bi-grid-3x3-gap"></i>
+      </div>
+      <span class="category-name">{{ getCategoryName(cat) }}</span>
+    </div>
+  </div>
+
+  <div class="text-center mt-4" *ngIf="hasMoreCategories && categories.length >= categoryPageSize">
+    <button class="btn btn-load-more" (click)="loadCategories()" [disabled]="loadingCategories">
+      <span *ngIf="loadingCategories" class="spinner-border spinner-border-sm me-2"></span>
+      {{ i18n.lang === 'ar' ? 'عرض المزيد' : 'Show More' }}
+    </button>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="container section-wrapper">
+  <div class="section-header">
+    <h2 class="section-title">{{ i18n.t('featuredProducts') }}</h2>
+    <i class="bi bi-star-fill section-icon"></i>
+  </div>
+
+  <div *ngIf="loadingFeatured" class="products-grid">
+    <div *ngFor="let _ of [].constructor(4)" class="product-skeleton">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  </div>
+
+  <div class="products-grid" *ngIf="!loadingFeatured && featuredProducts.length">
+    <article class="product-card" *ngFor="let p of featuredProducts; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span class="product-badge featured">{{ i18n.lang === 'ar' ? 'مميز' : 'Featured' }}</span>
+        <span class="product-badge discount" *ngIf="p.discountPercentage">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ getProductName(p) }}</h3>
+        <div class="product-price">{{ p.finalPrice ?? p.price }} <span class="currency">EGP</span></div>
+        <div class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price">{{ p.price }} EGP</div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!loadingFeatured && featuredProducts.length === 0" class="empty-state">
+    <i class="bi bi-star"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد منتجات مميزة.' : 'No featured products.' }}</p>
+  </div>
+</section>
+
+<!-- Deals Section -->
+<section class="container section-wrapper">
+  <div class="section-header">
+    <h2 class="section-title">{{ i18n.lang === 'ar' ? 'عروض خاصة' : 'Special Deals' }}</h2>
+    <span class="section-badge deal">{{ i18n.lang === 'ar' ? 'خصم' : 'Discount' }}</span>
+  </div>
+
+  <div *ngIf="loadingDiscounted" class="products-grid">
+    <div *ngFor="let _ of [].constructor(4)" class="product-skeleton">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  </div>
+
+  <div class="products-grid" *ngIf="!loadingDiscounted && discountedProducts.length">
+    <article class="product-card" *ngFor="let p of discountedProducts; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span class="product-badge discount" *ngIf="p.discountPercentage">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ getProductName(p) }}</h3>
+        <div class="product-price">{{ p.finalPrice ?? p.price }} <span class="currency">EGP</span></div>
+        <div class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price">{{ p.price }} EGP</div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!loadingDiscounted && discountedProducts.length === 0" class="empty-state">
+    <i class="bi bi-fire"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد عروض متاحة.' : 'No deals available.' }}</p>
+  </div>
+</section>
+
+<!-- Best Selling -->
+<section class="container section-wrapper">
+  <div class="section-header">
+    <h2 class="section-title">{{ i18n.t('bestSelling') }}</h2>
+    <i class="bi bi-trophy-fill section-icon"></i>
+  </div>
+
+  <div *ngIf="loadingBestSelling" class="products-grid">
+    <div *ngFor="let _ of [].constructor(4)" class="product-skeleton">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  </div>
+
+  <div class="products-grid" *ngIf="!loadingBestSelling && bestSellingProducts.length">
+    <article class="product-card" *ngFor="let p of bestSellingProducts; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span class="product-badge top">{{ i18n.lang === 'ar' ? 'الأكثر مبيعاً' : 'Top' }}</span>
+        <span class="product-badge discount" *ngIf="p.discountPercentage">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ getProductName(p) }}</h3>
+        <div class="product-price">{{ p.finalPrice ?? p.price }} <span class="currency">EGP</span></div>
+        <div class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price">{{ p.price }} EGP</div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!loadingBestSelling && bestSellingProducts.length === 0" class="empty-state">
+    <i class="bi bi-bar-chart"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد منتجات أكثر مبيعاً بعد.' : 'No best-selling products yet.' }}</p>
+  </div>
+</section>
+
+<!-- More Products -->
+<section class="container section-wrapper section-last">
+  <div class="section-header">
+    <h2 class="section-title">{{ i18n.lang === 'ar' ? 'منتجات أخرى' : 'More Products' }}</h2>
+    <i class="bi bi-boxes section-icon"></i>
+  </div>
+
+  <div *ngIf="loadingOthers" class="products-grid">
+    <div *ngFor="let _ of [].constructor(4)" class="product-skeleton">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  </div>
+
+  <div class="products-grid" *ngIf="!loadingOthers && otherProducts.length">
+    <article class="product-card" *ngFor="let p of otherProducts; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span class="product-badge discount" *ngIf="p.discountPercentage">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ getProductName(p) }}</h3>
+        <div class="product-price">{{ p.finalPrice ?? p.price }} <span class="currency">EGP</span></div>
+        <div class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price">{{ p.price }} EGP</div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!loadingOthers && otherProducts.length === 0" class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد منتجات إضافية.' : 'No additional products.' }}</p>
+  </div>
+</section>

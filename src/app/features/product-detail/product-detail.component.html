@@ -1,0 +1,89 @@
+<div class="product-detail-page">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && errorMessage" class="error-state">
+    <i class="bi bi-exclamation-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-outline-primary" (click)="goBack()">{{ i18n.lang === 'ar' ? 'رجوع' : 'Back' }}</button>
+  </div>
+
+  <!-- Product Detail -->
+  <div *ngIf="!loading && product" class="product-detail-grid">
+    <!-- Image -->
+    <div class="product-gallery">
+      <div class="gallery-main">
+        <img *ngIf="product.imageUrl" [src]="getImageUrl()" [alt]="product.nameAr">
+        <div *ngIf="!product.imageUrl" class="gallery-placeholder">
+          <i class="bi bi-image"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="product-details">
+      <div class="details-card">
+        <div class="product-meta">
+          <span class="meta-badge category">{{ product.categoryName || (i18n.lang === 'ar' ? 'غير مصنف' : 'Uncategorized') }}</span>
+          <span class="meta-badge" [class.in-stock]="product.stockQuantity > 0" [class.out-stock]="product.stockQuantity === 0">
+            {{ product.stockQuantity > 0 ? (i18n.lang === 'ar' ? 'متوفر' : 'In Stock') : (i18n.lang === 'ar' ? 'نفذت الكمية' : 'Out of Stock') }}
+          </span>
+        </div>
+
+        <h1 class="product-title">{{ i18n.lang === 'ar' ? product.nameAr : (product.nameEn || product.nameAr) }}</h1>
+
+        <div class="price-section">
+          <span class="price-current">{{ product.finalPrice ?? product.price }} <span class="price-currency">EGP</span></span>
+          <span class="old-price" *ngIf="product.finalPrice && product.finalPrice < product.price">{{ product.price }} EGP</span>
+          <span *ngIf="product.discountPercentage" class="price-discount">
+            {{ i18n.lang === 'ar' ? 'خصم' : 'Save' }} {{ product.discountPercentage }}%
+          </span>
+        </div>
+
+        <div *ngIf="maxStock > 0" class="stock-info">
+          <i class="bi bi-box-seam"></i>
+          {{ i18n.lang === 'ar' ? 'المخزون:' : 'Stock:' }} {{ maxStock }} {{ i18n.lang === 'ar' ? 'قطعة' : 'units' }}
+        </div>
+
+        <div class="quantity-section">
+          <label class="quantity-label">{{ i18n.lang === 'ar' ? 'الكمية' : 'Quantity' }}</label>
+          <div class="quantity-control">
+            <button class="qty-btn" (click)="decrement()" [disabled]="quantity <= 1">-</button>
+            <span class="qty-value">{{ quantity }}</span>
+            <button class="qty-btn" (click)="increment()" [disabled]="!canIncrement">+</button>
+          </div>
+          <div *ngIf="stockWarning" class="qty-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>{{ stockWarning }}
+          </div>
+          <div *ngIf="isOutOfStock" class="qty-error">
+            <i class="bi bi-x-circle-fill"></i>{{ i18n.lang === 'ar' ? 'المنتج غير متوفر حالياً' : 'Product is currently out of stock' }}
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-add-cart" [disabled]="isOutOfStock" (click)="addToOrder()">
+            <i class="bi bi-cart-plus"></i>
+            {{ i18n.lang === 'ar' ? 'أضف للطلب' : 'Add to Order' }}
+          </button>
+          <button class="btn-buy-now" [disabled]="isOutOfStock" (click)="buyNow()">
+            <i class="bi bi-lightning-fill"></i>
+            {{ i18n.lang === 'ar' ? 'اشتري الآن' : 'Buy Now' }}
+          </button>
+          <button class="btn-back" (click)="goBack()">
+            {{ i18n.lang === 'ar' ? 'رجوع' : 'Back' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Found -->
+  <div *ngIf="!loading && !product && !errorMessage" class="not-found-state">
+    <i class="bi bi-box-seam"></i>
+    <h3>{{ i18n.lang === 'ar' ? 'المنتج غير موجود' : 'Product not found' }}</h3>
+    <button class="btn btn-outline-primary" (click)="goBack()">{{ i18n.lang === 'ar' ? 'رجوع' : 'Back' }}</button>
+  </div>
+</div>

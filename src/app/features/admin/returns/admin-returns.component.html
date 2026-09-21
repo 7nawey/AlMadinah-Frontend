@@ -1,0 +1,154 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.lang === 'ar' ? 'المرتجعات' : 'Returns' }}</h4>
+  <button class="btn btn-gradient" (click)="openCreate()">
+    <span class="btn-icon-inner">+</span> {{ i18n.lang === 'ar' ? 'مرتجع جديد' : 'New Return' }}
+  </button>
+</div>
+
+<!-- Create Return Form -->
+<div class="card-modern form-card" *ngIf="showCreate">
+  <div class="card-header">
+    <span class="card-header-title">{{ i18n.lang === 'ar' ? 'إنشاء مرتجع جديد' : 'Create New Return' }}</span>
+    <button class="btn-close" (click)="closeCreate()"></button>
+  </div>
+  <div class="card-body p-4">
+    <!-- Step 1: Select Order -->
+    <div *ngIf="!selectedOrder">
+      <label class="form-label fw-bold">{{ i18n.lang === 'ar' ? 'اختر الطلب:' : 'Select Order:' }}</label>
+      <div class="table-responsive">
+        <table class="table-modern mb-0">
+          <thead>
+            <tr>
+              <th style="width:50px">#</th>
+              <th>{{ i18n.lang === 'ar' ? 'الهاتف' : 'Phone' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'الإجمالي' : 'Total' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'المنتجات' : 'Items' }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of orders; let i = index" (click)="selectOrder(o)" class="selectable-row">
+              <td><span class="row-num">{{ i + 1 }}</span></td>
+              <td>{{ o.customerPhone }}</td>
+              <td class="fw-bold">{{ o.totalPrice }} EGP</td>
+              <td>{{ o.items.length }}</td>
+              <td><span class="select-badge">{{ i18n.lang === 'ar' ? 'اختيار' : 'Select' }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="!orders.length" class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>{{ i18n.lang === 'ar' ? 'لا توجد طلبات متاحة.' : 'No orders available.' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Products to Return -->
+    <div *ngIf="selectedOrder">
+      <div class="selected-order-header">
+        <div class="selected-order-info">
+          <strong>{{ i18n.lang === 'ar' ? 'الطلب:' : 'Order:' }}</strong> {{ selectedOrder.id | slice:0:12 }}
+          <span class="selected-order-phone">{{ selectedOrder.customerPhone }}</span>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" (click)="selectedOrder = null; returnItems = []">
+          {{ i18n.lang === 'ar' ? 'تغيير الطلب' : 'Change Order' }}
+        </button>
+      </div>
+
+      <div class="form-check form-check-modern mb-3">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="isFullReturn" (change)="toggleFullReturn()" id="fullReturn" />
+        <label class="form-check-label" for="fullReturn">{{ i18n.lang === 'ar' ? 'مرتجع كامل' : 'Full Return' }}</label>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table-modern mb-0">
+          <thead>
+            <tr>
+              <th>{{ i18n.lang === 'ar' ? 'اختيار' : 'Select' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'الكمية الأصلية' : 'Original Qty' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'الكمية المرتجعة' : 'Return Qty' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of returnItems">
+              <td><input type="checkbox" class="form-check-input" [(ngModel)]="item.selected" /></td>
+              <td class="fw-semibold">{{ item.productName }}</td>
+              <td>{{ item.maxQty }}</td>
+              <td>
+                <input type="number" class="form-control form-control-sm form-control-modern return-qty-input" [(ngModel)]="item.qty" [disabled]="!item.selected" min="1" [max]="item.maxQty" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-actions mt-3">
+        <button class="btn btn-success" (click)="submitReturn()" [disabled]="!canSubmit || createLoading">
+          <span *ngIf="createLoading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ i18n.lang === 'ar' ? 'تأكيد المرتجع' : 'Confirm Return' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-row">
+  <div class="filter-item filter-item-wide">
+    <input type="text" class="form-control form-control-modern" [(ngModel)]="searchOrderId" [placeholder]="i18n.lang === 'ar' ? 'بحث برقم الطلب...' : 'Search by Order ID...'" />
+  </div>
+  <div class="filter-item">
+    <input type="date" class="form-control form-control-modern" [(ngModel)]="filterDate" />
+  </div>
+  <div class="filter-item filter-item-action">
+    <button class="btn btn-modern btn-modern-secondary w-100" (click)="searchOrderId = ''; filterDate = ''">{{ i18n.lang === 'ar' ? 'مسح' : 'Clear' }}</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="empty-state">
+  <div class="spinner-border text-primary"></div>
+</div>
+
+<!-- Returns List -->
+<div class="card-modern" *ngIf="!loading">
+  <div class="card-header">
+    <span class="card-header-title">{{ i18n.lang === 'ar' ? 'سجل المرتجعات' : 'Returns History' }}</span>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>{{ i18n.lang === 'ar' ? 'رقم الطلب' : 'Order ID' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'الحالة' : 'Status' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'المنتجات المرتجعة' : 'Returned Items' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'التاريخ' : 'Date' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ret of filteredReturns; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td class="fw-semibold">{{ ret.orderId | slice:0:8 }}</td>
+            <td><span class="status-badge status-info">{{ ret.status }}</span></td>
+            <td>
+              <div class="returned-items-list">
+                <span *ngFor="let item of ret.items; let last = last" class="returned-item">
+                  {{ item.productName }} x{{ item.quantity }}{{ !last ? ', ' : '' }}
+                </span>
+              </div>
+            </td>
+            <td class="text-muted">{{ ret.createdAt | date:'short' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!filteredReturns.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.lang === 'ar' ? 'لا توجد مرتجعات.' : 'No returns found.' }}</p>
+    </div>
+  </div>
+</div>

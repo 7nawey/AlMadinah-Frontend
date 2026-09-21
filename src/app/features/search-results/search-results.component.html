@@ -1,0 +1,55 @@
+<div class="container-centered mt-4">
+  <h4 class="mb-3 page-title search-page-title">{{ i18n.lang === 'ar' ? 'نتائج البحث عن' : 'Search results for' }} "<span class="search-keyword">{{ keyword }}</span>"</h4>
+
+  <!-- Local filter -->
+  <div class="search-filter-bar mb-3">
+    <span class="search-filter-icon"><i class="bi bi-funnel"></i></span>
+    <input
+      type="text"
+      class="form-control form-control-modern search-filter-input"
+      [placeholder]="i18n.lang === 'ar' ? 'ابحث داخل النتائج...' : 'Filter results...'"
+      [(ngModel)]="searchText"
+      (input)="applyLocalFilter()"
+    />
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading" class="products-grid">
+    <div *ngFor="let _ of [].constructor(8)" class="placeholder-glow">
+      <div class="product-card">
+        <div class="placeholder" style="aspect-ratio:1/1;width:100%;"></div>
+        <div class="card-body">
+          <span class="placeholder col-8" style="height:14px;border-radius:4px;"></span>
+          <span class="placeholder col-4" style="height:14px;border-radius:4px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Grid -->
+  <div class="products-grid" *ngIf="!loading && filteredResults.length > 0">
+    <article class="product-card" *ngFor="let p of filteredResults; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span *ngIf="p.discountPercentage" class="product-badge">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="card-body">
+        <h6>{{ getProductName(p) }}</h6>
+        <p class="price">{{ p.finalPrice ?? p.price }} <span style="font-size:0.75rem;font-weight:500;color:var(--text-muted);margin-inline-start:0.25rem;">EGP</span></p>
+        <p class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price" style="margin:0;">{{ p.price }} EGP</p>
+      </div>
+    </article>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && filteredResults.length === 0" class="empty-state search-empty-state">
+    <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+    <p class="empty-state-title">{{ i18n.lang === 'ar' ? 'لا توجد منتجات مطابقة' : 'No matching products' }}</p>
+    <p class="empty-state-hint">{{ i18n.lang === 'ar' ? 'جرب كلمات بحث مختلفة أو تصفح الفئات' : 'Try different keywords or browse categories' }}</p>
+    <a routerLink="/" class="btn btn-modern btn-modern-primary mt-3">
+      <i class="bi bi-house"></i>
+      {{ i18n.lang === 'ar' ? 'الصفحة الرئيسية' : 'Back to Home' }}
+    </a>
+  </div>
+</div>

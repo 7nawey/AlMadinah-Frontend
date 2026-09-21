@@ -1,0 +1,167 @@
+<!-- Barcode Scan -->
+<div class="barcode-scan-section">
+  <label class="form-label barcode-label">{{ i18n.lang === 'ar' ? 'مسح الباركود (Scanner)' : 'Barcode Scan' }}</label>
+  <input
+    type="text"
+    class="form-control form-control-modern barcode-input"
+    [(ngModel)]="barcodeScan"
+    (change)="onBarcodeScan($event)"
+    [placeholder]="i18n.lang === 'ar' ? 'امسح الباركود هنا...' : 'Scan barcode here...'"
+    autofocus
+  />
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-search">
+    <input
+      type="text"
+      class="form-control form-control-modern"
+      [(ngModel)]="searchQuery"
+      (input)="applySearch()"
+      [placeholder]="i18n.lang === 'ar' ? 'بحث بالاسم أو الباركود...' : 'Search by name or barcode...'"
+    />
+  </div>
+  <button class="btn btn-gradient" (click)="openAdd()">
+    <span class="btn-icon-inner">+</span> {{ i18n.t('addProduct') }}
+  </button>
+</div>
+
+<!-- Product Form -->
+<div class="card-modern form-card" *ngIf="showForm">
+  <div class="card-body p-4">
+    <div class="form-card-header">
+      <h6 class="form-card-title">{{ editing ? i18n.t('editProduct') : i18n.t('addProduct') }}</h6>
+      <button class="btn-close" (click)="showForm = false"></button>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-label">{{ i18n.lang === 'ar' ? 'معلومات المنتج' : 'Product Information' }}</div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.t('productName') }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="form.nameAr" (input)="onNameArChange()" />
+          <div *ngIf="nameEnSuggestion" class="suggestion-badge mt-1">
+            <span class="text-muted small">{{ i18n.lang === 'ar' ? 'اقتراح:' : 'Suggestion:' }} {{ nameEnSuggestion }}</span>
+            <button class="btn btn-sm btn-link p-0 ms-1" (click)="applySuggestion('en')">{{ i18n.lang === 'ar' ? 'استخدام' : 'Use' }}</button>
+            <button class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="clearSuggestion('en')">{{ i18n.lang === 'ar' ? 'تجاهل' : 'Dismiss' }}</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.t('productNameEn') }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="form.nameEn" (input)="onNameEnChange()" />
+          <div *ngIf="nameArSuggestion" class="suggestion-badge mt-1">
+            <span class="text-muted small">{{ i18n.lang === 'ar' ? 'اقتراح:' : 'Suggestion:' }} {{ nameArSuggestion }}</span>
+            <button class="btn btn-sm btn-link p-0 ms-1" (click)="applySuggestion('ar')">{{ i18n.lang === 'ar' ? 'استخدام' : 'Use' }}</button>
+            <button class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="clearSuggestion('ar')">{{ i18n.lang === 'ar' ? 'تجاهل' : 'Dismiss' }}</button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.t('barcode') }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="form.barcode" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-label">{{ i18n.lang === 'ar' ? 'التسعير والمخزون' : 'Pricing & Inventory' }}</div>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.t('price') }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="form.price" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.t('costPrice') }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="form.costPrice" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.t('stock') }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="form.stockQuantity" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.t('category') }}</label>
+          <select class="form-select form-control-modern" [(ngModel)]="form.categoryName">
+            <option value="">--</option>
+            <option *ngFor="let c of categories" [value]="c.nameAr">{{ c.nameAr }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section form-section-last">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.t('image') }}</label>
+          <input type="file" class="form-control form-control-modern" (change)="onFileChange($event)" />
+        </div>
+        <div class="col-md-4">
+          <div class="form-check form-check-modern">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" id="activeCheck" />
+            <label class="form-check-label" for="activeCheck">{{ i18n.t('active') }}</label>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <button class="btn btn-success" (click)="save()">{{ i18n.t('save') }}</button>
+          <button class="btn btn-outline-secondary ms-2" (click)="showForm = false">{{ i18n.t('cancel') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Products Table -->
+<div class="card-modern">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th style="width:60px">{{ i18n.t('image') }}</th>
+            <th>{{ i18n.t('productName') }}</th>
+            <th>{{ i18n.t('barcode') }}</th>
+            <th>{{ i18n.t('price') }}</th>
+            <th>{{ i18n.t('stock') }}</th>
+            <th>{{ i18n.t('category') }}</th>
+            <th style="width:180px">{{ i18n.t('actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredProducts; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td>
+              <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" class="product-thumb" />
+              <div *ngIf="!p.imageUrl" class="cat-thumb-wrapper"><i class="bi bi-image text-muted"></i></div>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ p.nameAr }}</div>
+              <div class="text-muted small">{{ p.nameEn }}</div>
+            </td>
+            <td class="font-monospace text-muted">{{ p.barcode || '-' }}</td>
+            <td class="fw-bold price-cell">{{ p.price }} EGP</td>
+            <td>
+              <span [class.stock-badge-high]="p.stockQuantity >= 10" [class.stock-badge-low]="p.stockQuantity < 10">
+                {{ p.stockQuantity }}
+              </span>
+            </td>
+            <td class="text-muted">{{ p.categoryName || '-' }}</td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action-labeled btn-action-edit-labeled" (click)="edit(p)" title="{{ i18n.t('edit') }}">
+                  <i class="bi bi-pencil"></i><span class="btn-label">{{ i18n.t('edit') }}</span>
+                </button>
+                <button class="btn-action-labeled btn-action-delete-labeled" (click)="delete(p.id)" title="{{ i18n.t('delete') }}">
+                  <i class="bi bi-trash"></i><span class="btn-label">{{ i18n.t('delete') }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !filteredProducts.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.t('noProducts') }}</p>
+    </div>
+  </div>
+</div>

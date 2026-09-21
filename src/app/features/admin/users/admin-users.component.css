@@ -1,0 +1,96 @@
+/* ===== MODERN ADMIN: USERS ===== */
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+}
+
+.modal-content-wrapper {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1060;
+  width: 92%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-card {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card .card-header {
+  padding: 1.25rem;
+}
+
+/* User Role Badge */
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #334155;
+  text-transform: capitalize;
+}
+
+/* User Actions */
+.user-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.user-actions .btn-sm {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.user-actions .btn-sm:hover {
+  transform: translateY(-1px);
+}
+
+/* Status Badge Overrides */
+.status-badge.status-failed {
+  background: rgba(225, 112, 85, 0.1);
+  color: #e17055;
+}
+
+.status-badge.status-pending {
+  background: rgba(253, 203, 110, 0.15);
+  color: #d4a017;
+}
+
+.status-badge.status-paid {
+  background: rgba(0, 184, 148, 0.1);
+  color: #00b894;
+}
+
+/* Table alignment */
+.table-modern tbody td {
+  vertical-align: middle;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-actions {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .user-actions .btn-sm {
+    width: 100%;
+    text-align: center;
+  }
+}

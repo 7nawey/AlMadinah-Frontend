@@ -1,0 +1,181 @@
+<div class="container-centered payment-page">
+  <!-- Page Header -->
+  <div class="payment-header">
+    <h1 class="payment-title">{{ i18n.t('payment') }}</h1>
+    <p class="payment-subtitle">{{ i18n.lang === 'ar' ? 'أكمل طلبك بأمان وثقة' : 'Complete your order securely and with confidence' }}</p>
+  </div>
+
+  <!-- Flow Indicator -->
+  <div class="payment-flow" *ngIf="!success && !pendingConfirmation">
+    <div class="flow-step completed">
+      <div class="flow-dot"><i class="bi bi-cart-check"></i></div>
+      <span class="flow-label">{{ i18n.lang === 'ar' ? 'السلة' : 'Cart' }}</span>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step active">
+      <div class="flow-dot"><i class="bi bi-credit-card"></i></div>
+      <span class="flow-label">{{ i18n.lang === 'ar' ? 'الدفع' : 'Payment' }}</span>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-step">
+      <div class="flow-dot"><i class="bi bi-check-lg"></i></div>
+      <span class="flow-label">{{ i18n.lang === 'ar' ? 'تم' : 'Done' }}</span>
+    </div>
+  </div>
+
+  <div class="row g-4 justify-content-center">
+    <!-- Order Summary Card -->
+    <div class="col-lg-6">
+      <div class="card-modern payment-card">
+        <div class="card-header payment-card-header">
+          <div class="card-header-icon"><i class="bi bi-receipt"></i></div>
+          <span class="card-header-title">{{ i18n.t('orderSummary') }}</span>
+        </div>
+        <div class="card-body payment-card-body">
+          <!-- Order Type Badge -->
+          <div class="mb-3">
+            <span class="status-badge" [class.status-processing]="checkoutInfo.orderType === 'retail'" [class.status-paid]="checkoutInfo.orderType === 'wholesale'">
+              <i class="bi" [class.bi-bag]="checkoutInfo.orderType === 'retail'" [class.bi-shop]="checkoutInfo.orderType === 'wholesale'"></i>
+              {{ checkoutInfo.orderType === 'retail' ? (i18n.lang === 'ar' ? 'طلب تجزئة' : 'Retail Order') : (i18n.lang === 'ar' ? 'طلب جملة' : 'Wholesale Order') }}
+            </span>
+          </div>
+
+          <!-- Line Items -->
+          <div class="payment-line-items">
+            <div class="payment-line-item">
+              <div class="line-item-label">
+                <i class="bi bi-box-seam"></i>
+                <span>{{ i18n.lang === 'ar' ? 'المنتجات' : 'Products' }}</span>
+              </div>
+              <span class="line-item-value">{{ orderItems.length }}</span>
+            </div>
+            <div class="payment-line-item">
+              <div class="line-item-label">
+                <i class="bi bi-calculator"></i>
+                <span>{{ i18n.lang === 'ar' ? 'المجموع' : 'Subtotal' }}</span>
+              </div>
+              <span class="line-item-value">{{ subtotal }} EGP</span>
+            </div>
+            <div class="payment-line-item">
+              <div class="line-item-label">
+                <i class="bi bi-truck"></i>
+                <span>{{ i18n.t('deliveryFee') }}</span>
+              </div>
+              <span class="line-item-value" [class.text-success]="deliveryFee === 0">
+                {{ deliveryFee === 0 ? (i18n.lang === 'ar' ? 'مجاني' : 'FREE') : deliveryFee + ' EGP' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="payment-total">
+            <span class="total-label">{{ i18n.t('total') }}</span>
+            <span class="total-value">{{ total }} <span class="total-currency">EGP</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Method Card -->
+    <div class="col-lg-6">
+      <div class="card-modern payment-card">
+        <div class="card-header payment-card-header">
+          <div class="card-header-icon"><i class="bi bi-credit-card-2-back"></i></div>
+          <span class="card-header-title">{{ i18n.t('paymentMethod') }}</span>
+        </div>
+        <div class="card-body payment-card-body">
+          <!-- Pending Confirmation State (returned from gateway — webhook is source of truth) -->
+          <div *ngIf="pendingConfirmation" class="payment-success-state">
+            <div class="success-icon"><i class="bi bi-hourglass-split"></i></div>
+            <h5 class="success-title">{{ i18n.t('confirmingPayment') }}</h5>
+            <p class="success-subtitle">{{ i18n.lang === 'ar' ? 'جاري تأكيد عملية الدفع... سيتم تحديث حالة طلبك تلقائياً' : 'Confirming your payment... your order status will update automatically' }}</p>
+          </div>
+
+          <!-- Success State -->
+          <div *ngIf="success" class="payment-success-state">
+            <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <h5 class="success-title">{{ i18n.t('orderSuccess') }}</h5>
+            <p class="success-subtitle">{{ i18n.lang === 'ar' ? 'جاري معالجة الدفع... سيتم تأكيد طلبك قريباً' : 'Processing your payment... your order will be confirmed shortly' }}</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error" class="payment-error-state">
+            <div class="error-icon"><i class="bi bi-x-octagon-fill"></i></div>
+            <p class="error-text">{{ errorMessage || i18n.t('orderFailed') }}</p>
+            <button class="btn btn-modern btn-modern-primary" (click)="error = false; errorMessage = ''">
+              <i class="bi bi-arrow-clockwise"></i>
+              {{ i18n.t('retry') }}
+            </button>
+          </div>
+
+          <!-- Payment Form -->
+          <div *ngIf="!success && !pendingConfirmation && !error">
+            <div class="payment-methods">
+              <label class="payment-method-option" [class.selected]="paymentMethod === 'card'">
+                <input type="radio" name="paymentMethod" [(ngModel)]="paymentMethod" value="card" class="payment-radio" />
+                <div class="payment-method-content">
+                  <div class="payment-method-icon"><i class="bi bi-credit-card"></i></div>
+                  <div class="payment-method-info">
+                    <span class="payment-method-name">{{ i18n.t('cardPayment') }}</span>
+                    <span class="payment-method-desc">{{ i18n.lang === 'ar' ? 'فيزا / ماستركارد / ميزة' : 'Visa / Mastercard / Meeza' }}</span>
+                  </div>
+                  <div class="payment-method-check"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+              </label>
+
+              <label class="payment-method-option" [class.selected]="paymentMethod === 'wallet'">
+                <input type="radio" name="paymentMethod" [(ngModel)]="paymentMethod" value="wallet" class="payment-radio" />
+                <div class="payment-method-content">
+                  <div class="payment-method-icon"><i class="bi bi-phone"></i></div>
+                  <div class="payment-method-info">
+                    <span class="payment-method-name">{{ i18n.t('mobileWallet') }}</span>
+                    <span class="payment-method-desc">{{ i18n.lang === 'ar' ? 'فودافون كاش، أورنج، اتصالات، WE' : 'Vodafone Cash, Orange, Etisalat, WE' }}</span>
+                  </div>
+                  <div class="payment-method-check"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+              </label>
+
+              <!-- Wallet phone input -->
+              <div class="wallet-phone-input" *ngIf="paymentMethod === 'wallet'">
+                <label class="form-label fw-semibold">{{ i18n.t('walletPhone') }}</label>
+                <input
+                  type="tel"
+                  class="form-control form-control-modern"
+                  [(ngModel)]="walletPhone"
+                  [placeholder]="i18n.lang === 'ar' ? '01xxxxxxxxx' : '01xxxxxxxxx'"
+                  dir="ltr"
+                  maxlength="11"
+                />
+              </div>
+
+              <label class="payment-method-option" [class.selected]="paymentMethod === 'cod'">
+                <input type="radio" name="paymentMethod" [(ngModel)]="paymentMethod" value="cod" class="payment-radio" />
+                <div class="payment-method-content">
+                  <div class="payment-method-icon"><i class="bi bi-cash-stack"></i></div>
+                  <div class="payment-method-info">
+                    <span class="payment-method-name">{{ i18n.t('payOnDelivery') }}</span>
+                    <span class="payment-method-desc">{{ i18n.lang === 'ar' ? 'ادفع عند استلام طلبك' : 'Pay when you receive your order' }}</span>
+                  </div>
+                  <div class="payment-method-check"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+              </label>
+            </div>
+
+            <div class="payment-action">
+              <button class="btn btn-modern btn-modern-primary w-100 payment-btn" (click)="pay()" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!loading" class="bi bi-lock-fill"></i>
+                {{ i18n.t('payNow') }}
+              </button>
+              <p class="payment-security-note">
+                <i class="bi bi-shield-check"></i>
+                {{ i18n.lang === 'ar' ? 'مدفوعات آمنة ومشفرة' : 'Secure & encrypted payments' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

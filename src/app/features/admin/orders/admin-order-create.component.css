@@ -1,0 +1,136 @@
+.order-container {
+  padding: 1rem;
+}
+
+.invoice-card {
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.item-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.btn-xs {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+}
+
+/* Product Dropdown */
+.product-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0 0 4px 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.product-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f3f5;
+  transition: background 0.15s;
+}
+
+.product-dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.dropdown-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.dropdown-info {
+  flex: 1;
+}
+
+/* Product Picker Grid */
+.product-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.product-picker-item {
+  text-align: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: 1px solid #e9ecef;
+  background: white;
+}
+
+.product-picker-item:hover {
+  border-color: #0d6efd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.picker-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+}
+
+.picker-name {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 28px;
+}
+
+.picker-price {
+  font-size: 11px;
+  color: #0d6efd;
+  font-weight: bold;
+}
+
+/* Scroll fixes */
+.admin-wrapper {
+  overflow-x: hidden;
+}
+
+.admin-content {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* RTL fixes */
+[dir="rtl"] .product-picker-grid {
+  padding-right: 0;
+  padding-left: 4px;
+}
+
+[dir="rtl"] .product-dropdown-item {
+  direction: rtl;
+}
+
+[dir="rtl"] .me-2 {
+  margin-right: 0 !important;
+  margin-left: 0.5rem !important;
+}

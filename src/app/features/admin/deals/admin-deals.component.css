@@ -1,0 +1,63 @@
+/* ===== MODERN ADMIN: DEALS ===== */
+
+/* Original Price (strikethrough style visually implied) */
+.original-price {
+  font-size: 0.9rem;
+  text-decoration: line-through;
+  text-decoration-color: #94a3b8;
+  text-decoration-thickness: 1px;
+}
+
+/* Price Cell */
+.price-cell {
+  color: var(--primary, #6c5ce7);
+  font-size: 0.95rem;
+}
+
+/* Status Badge Overrides */
+.status-badge.status-paid {
+  background: rgba(0, 184, 148, 0.1);
+  color: #00b894;
+}
+
+.status-badge.status-failed {
+  background: rgba(173, 181, 189, 0.15);
+  color: #64748b;
+}
+
+/* Form Card */
+.form-card {
+  margin-bottom: 1.5rem;
+}
+
+.form-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.form-card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+  color: #1e293b;
+}
+
+.form-actions {
+  padding-top: 0.5rem;
+}
+
+/* Action Group */
+.action-group {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-start;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .action-group {
+    gap: 0.3rem;
+  }
+}

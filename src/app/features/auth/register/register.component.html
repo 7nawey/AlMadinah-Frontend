@@ -1,0 +1,134 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-icon">
+        <svg class="logo-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="url(#logoGradAuthReg)"/>
+          <defs>
+            <linearGradient id="logoGradAuthReg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4f46e5"/>
+              <stop offset="100%" stop-color="#818cf8"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 9C17.5 9 14 14.5 14 18V20H34V18C34 14.5 30.5 9 24 9Z" fill="#10b981"/>
+          <path d="M24 9C19.5 9 17 12 16 15C18 13 20.5 11.5 24 11.5C27.5 11.5 30 13 32 15C31 12 28.5 9 24 9Z" fill="#34d399" opacity="0.5"/>
+          <path d="M27 6.5C27 5.5 26.5 5 25.5 5C26.7 5 27.6 5.8 27.6 7C27.6 8.4 26 9.8 24 9.8C26 9.8 27 8.5 27 6.5Z" fill="#fbbf24"/>
+          <rect x="12" y="20" width="24" height="15" rx="3" fill="#fff" opacity="0.95"/>
+          <rect x="15" y="20" width="18" height="5" rx="2.5" fill="#e0e7ff"/>
+          <path d="M19 20V17C19 15.5 20.5 14.5 22 14.5H26C27.5 14.5 29 15.5 29 17V20" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="brand-name">AL MADINA</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab" [class.active]="tab === 'password'" (click)="tab = 'password'">{{ i18n.lang === 'ar' ? 'باسورد' : 'Password' }}</button>
+      <button class="auth-tab" [class.active]="tab === 'otp'" (click)="tab = 'otp'">OTP</button>
+      <button class="auth-tab" [class.active]="tab === 'google'" (click)="tab = 'google'">Google</button>
+    </div>
+
+    <!-- Password Registration -->
+    <div *ngIf="tab === 'password'" class="auth-form">
+      <h3 class="form-title">{{ i18n.lang === 'ar' ? 'إنشاء حساب' : 'Create Account' }}</h3>
+      <div class="form-group">
+        <label>{{ i18n.lang === 'ar' ? 'الاسم الكامل' : 'Full Name' }}</label>
+        <input type="text" class="form-input" [(ngModel)]="name" placeholder="John Doe" />
+      </div>
+      <div class="form-group">
+        <label>{{ i18n.lang === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+        <input type="email" class="form-input" [(ngModel)]="email" placeholder="name@example.com" />
+      </div>
+      <div class="form-group">
+        <label>{{ i18n.lang === 'ar' ? 'رقم الهاتف' : 'Phone' }}</label>
+        <input type="tel" class="form-input" [(ngModel)]="phone" placeholder="01xxxxxxxx" />
+      </div>
+      <div class="form-group">
+        <label>{{ i18n.lang === 'ar' ? 'كلمة المرور' : 'Password' }}</label>
+        <input type="password" class="form-input" [(ngModel)]="password" (input)="checkPasswordStrength()" placeholder="••••••••" />
+        <div class="password-strength" *ngIf="password.length > 0">
+          <div class="strength-bar">
+            <div class="strength-fill" [class.weak]="passwordStrength === 'weak'" [class.medium]="passwordStrength === 'medium'" [class.strong]="passwordStrength === 'strong'" [style.width.%]="passwordStrengthPercent"></div>
+          </div>
+          <small class="strength-text">{{ passwordStrengthMessage }}</small>
+          <ul class="requirements">
+            <li [class.met]="hasUpperCase">{{ i18n.lang === 'ar' ? 'حرف كبير (A-Z)' : 'Uppercase letter' }}</li>
+            <li [class.met]="hasLowerCase">{{ i18n.lang === 'ar' ? 'حرف صغير (a-z)' : 'Lowercase letter' }}</li>
+            <li [class.met]="hasDigit">{{ i18n.lang === 'ar' ? 'رقم (0-9)' : 'Digit' }}</li>
+            <li [class.met]="hasSpecialChar">{{ i18n.lang === 'ar' ? 'رمز خاص (!@#$%^&*)' : 'Special character' }}</li>
+            <li [class.met]="hasMinLength">{{ i18n.lang === 'ar' ? '8 أحرف على الأقل' : 'At least 8 characters' }}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>{{ i18n.lang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password' }}</label>
+        <input type="password" class="form-input" [(ngModel)]="confirmPassword" (keyup.enter)="registerWithPassword()" placeholder="••••••••" />
+      </div>
+      <button class="btn-auth" (click)="registerWithPassword()" [disabled]="loading || passwordStrength === 'weak'">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+        {{ i18n.t('register') }}
+      </button>
+    </div>
+
+    <!-- OTP Registration -->
+    <div *ngIf="tab === 'otp'" class="auth-form">
+      <div *ngIf="step === 'email'">
+        <h3 class="form-title">{{ i18n.lang === 'ar' ? 'إنشاء حساب' : 'Create Account' }}</h3>
+        <div class="form-group">
+          <label>{{ i18n.lang === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+          <input type="email" class="form-input" [(ngModel)]="otpEmail" (keyup.enter)="sendOtp()" placeholder="name@example.com" />
+        </div>
+        <button class="btn-auth" (click)="sendOtp()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+          {{ i18n.lang === 'ar' ? 'إرسال رمز التحقق' : 'Send OTP' }}
+        </button>
+      </div>
+
+      <div *ngIf="step === 'otp'">
+        <p class="form-hint">{{ i18n.lang === 'ar' ? 'أدخل الرمز المرسل إلى' : 'Enter code sent to' }} {{ otpEmail }}</p>
+        <div class="form-group">
+          <label>OTP</label>
+          <input type="text" class="form-input otp-input" [(ngModel)]="otp" (keyup.enter)="verifyAndRegister()" placeholder="123456" maxlength="6" [class.is-invalid]="otpError" (input)="onOtpInput()" autofocus />
+          <div *ngIf="otpError" class="input-error">{{ i18n.lang === 'ar' ? 'الكود غير صحيح، حاول مرة أخرى.' : 'Invalid code, please retry.' }}</div>
+        </div>
+        <div class="resend-row">
+          <span class="resend-text">{{ i18n.lang === 'ar' ? 'لم يصلك الكود؟' : 'Didn\'t receive code?' }}</span>
+          <button class="btn-resend" [disabled]="resendTimer > 0" (click)="resendOtp()">
+            <span *ngIf="resendTimer === 0">{{ i18n.lang === 'ar' ? 'إعادة إرسال' : 'Resend' }}</span>
+            <span *ngIf="resendTimer > 0">{{ resendTimer }}s</span>
+          </button>
+        </div>
+        <button class="btn-auth" (click)="verifyAndRegister()" [disabled]="loading || otp.length < 6">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+          {{ i18n.lang === 'ar' ? 'تحقق وإنشاء الحساب' : 'Verify & Create Account' }}
+        </button>
+        <button class="btn-secondary" (click)="backToEmail()">{{ i18n.lang === 'ar' ? 'تغيير البريد' : 'Change Email' }}</button>
+      </div>
+
+      <div *ngIf="step === 'success'" class="success-state">
+        <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <h4>{{ i18n.lang === 'ar' ? 'تم إنشاء الحساب!' : 'Account created!' }}</h4>
+      </div>
+    </div>
+
+    <!-- Google Registration -->
+    <div *ngIf="tab === 'google'" class="auth-form text-center">
+      <p class="form-hint">{{ i18n.lang === 'ar' ? 'سجل دخول بحساب Google' : 'Sign in with Google' }}</p>
+      <button class="btn-google" (click)="loginWithGoogle()" [disabled]="googleLoading">
+        <span *ngIf="googleLoading" class="spinner-border spinner-border-sm"></span>
+        <img src="https://www.google.com/favicon.ico" width="18" />
+        {{ i18n.lang === 'ar' ? 'تسجيل الدخول بـ Google' : 'Sign in with Google' }}
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="errorMessage" class="auth-error">
+      {{ errorMessage }}
+    </div>
+
+    <div class="auth-footer">
+      <span class="footer-text">{{ i18n.lang === 'ar' ? 'لديك حساب؟ ' : 'Already have an account? ' }}</span>
+      <a routerLink="/login" class="footer-link">{{ i18n.t('login') }}</a>
+    </div>
+  </div>
+</div>

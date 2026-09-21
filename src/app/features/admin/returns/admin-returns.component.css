@@ -1,0 +1,153 @@
+/* ===== MODERN ADMIN: RETURNS ===== */
+
+/* Selectable Row */
+.selectable-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.selectable-row:hover {
+  background: #f8f9fa !important;
+}
+
+.selectable-row:hover td {
+  background: transparent !important;
+}
+
+/* Select Badge */
+.select-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(108, 92, 231, 0.1);
+  color: var(--primary, #6c5ce7);
+}
+
+/* Selected Order Header */
+.selected-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.selected-order-info {
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.selected-order-phone {
+  display: inline-flex;
+  margin-inline-start: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(9, 132, 227, 0.1);
+  color: #0984e3;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Return Qty Input */
+.return-qty-input {
+  width: 80px !important;
+  text-align: center;
+  padding: 0.35rem 0.5rem;
+}
+
+/* Filters Row */
+.filters-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 160px;
+}
+
+.filter-item-wide {
+  flex: 2;
+  min-width: 220px;
+}
+
+.filter-item-action {
+  flex: 0 0 auto;
+  min-width: 100px;
+}
+
+/* Form Check Modern */
+.form-check-modern {
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+.form-check-modern .form-check-input {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.3rem;
+  border-color: #dee2e6;
+  cursor: pointer;
+}
+
+.form-check-modern .form-check-input:checked {
+  background-color: var(--primary, #6c5ce7);
+  border-color: var(--primary, #6c5ce7);
+}
+
+.form-check-modern .form-check-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  padding-left: 0.25rem;
+}
+
+/* Returned Items List */
+.returned-items-list {
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.returned-item {
+  display: inline;
+}
+
+/* Form Actions */
+.form-actions {
+  padding-top: 0.5rem;
+}
+
+/* Status Badge Info */
+.status-badge.status-info {
+  background: rgba(9, 132, 227, 0.1);
+  color: #0984e3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-item,
+  .filter-item-wide,
+  .filter-item-action {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .selected-order-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

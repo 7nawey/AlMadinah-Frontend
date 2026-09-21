@@ -1,0 +1,181 @@
+<header class="site-header sticky-top">
+  <!-- ROW 1: Logo + Nav + Actions -->
+  <div class="header-top">
+    <div class="container-fluid px-3 px-lg-4">
+      <div class="header-top-inner">
+        <!-- Logo -->
+        <a class="header-logo" routerLink="/">
+          <span class="logo-icon">
+            <svg class="logo-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" rx="12" fill="url(#logoGrad)"/>
+              <defs>
+                <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#4f46e5"/>
+                  <stop offset="100%" stop-color="#818cf8"/>
+                </linearGradient>
+              </defs>
+              <!-- Dome -->
+              <path d="M24 9C17.5 9 14 14.5 14 18V20H34V18C34 14.5 30.5 9 24 9Z" fill="#10b981"/>
+              <path d="M24 9C19.5 9 17 12 16 15C18 13 20.5 11.5 24 11.5C27.5 11.5 30 13 32 15C31 12 28.5 9 24 9Z" fill="#34d399" opacity="0.5"/>
+              <!-- Crescent -->
+              <path d="M27 6.5C27 5.5 26.5 5 25.5 5C26.7 5 27.6 5.8 27.6 7C27.6 8.4 26 9.8 24 9.8C26 9.8 27 8.5 27 6.5Z" fill="#fbbf24"/>
+              <!-- Bag body -->
+              <rect x="12" y="20" width="24" height="15" rx="3" fill="#fff" opacity="0.95"/>
+              <!-- Bag opening -->
+              <rect x="15" y="20" width="18" height="5" rx="2.5" fill="#e0e7ff"/>
+              <!-- Bag handle -->
+              <path d="M19 20V17C19 15.5 20.5 14.5 22 14.5H26C27.5 14.5 29 15.5 29 17V20" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="logo-text d-none d-sm-inline">AL MADINA</span>
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="mobile-menu-btn d-lg-none" type="button" (click)="isMenuOpen = !isMenuOpen"
+                [attr.aria-expanded]="isMenuOpen">
+          <span class="burger-icon" [class.open]="isMenuOpen">
+            <span></span><span></span><span></span>
+          </span>
+        </button>
+
+        <!-- Desktop Nav -->
+        <nav class="header-nav d-none d-lg-flex">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-pill">
+            <i class="bi bi-house"></i>
+            <span>{{ i18n.t('home') }}</span>
+          </a>
+          <a *ngIf="isAdmin" routerLink="/admin" routerLinkActive="active" class="nav-pill">
+            <i class="bi bi-speedometer2"></i>
+            <span>{{ i18n.t('admin') }}</span>
+          </a>
+          <a routerLink="/orders" routerLinkActive="active" class="nav-pill" *ngIf="isLoggedIn">
+            <i class="bi bi-box-seam"></i>
+            <span>{{ i18n.lang === 'ar' ? 'طلباتي' : 'My Orders' }}</span>
+          </a>
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="header-actions">
+          <!-- Cart -->
+          <a routerLink="/checkout" class="action-btn cart-btn" routerLinkActive="active">
+            <i class="bi bi-cart3"></i>
+            <span class="d-none d-md-inline">{{ i18n.lang === 'ar' ? 'السلة' : 'Cart' }}</span>
+            <span class="cart-badge" *ngIf="orderCount > 0">{{ orderCount }}</span>
+          </a>
+
+          <!-- Auth -->
+          <ng-container *ngIf="!isLoggedIn">
+            <a routerLink="/login" class="action-btn" routerLinkActive="active">
+              <i class="bi bi-box-arrow-in-right"></i>
+              <span class="d-none d-md-inline">{{ i18n.t('login') }}</span>
+            </a>
+          </ng-container>
+          <ng-container *ngIf="isLoggedIn">
+            <button class="action-btn logout-btn" (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i>
+              <span class="d-none d-md-inline">{{ i18n.t('logout') }}</span>
+            </button>
+          </ng-container>
+
+          <!-- Language -->
+          <app-language-switcher class="lang-switcher"></app-language-switcher>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Search Bar -->
+  <div class="header-search-bar">
+    <div class="container-fluid px-3 px-lg-4">
+      <div class="search-bar-inner">
+        <!-- Normal Search -->
+        <div class="search-input-group" *ngIf="!barcodeMode">
+          <span class="search-icon"><i class="bi bi-search"></i></span>
+          <input id="searchInput" type="text" class="search-input"
+                 [placeholder]="i18n.t('searchPlaceholder')"
+                 [(ngModel)]="searchKeyword" (input)="onSearchInput()" autocomplete="off" />
+          <button class="search-btn" type="button" (click)="submitSearch()">
+            <i class="bi bi-search"></i>
+          </button>
+          <button class="qr-btn" type="button" (click)="toggleBarcodeMode()"
+                  title="{{ i18n.lang === 'ar' ? 'مسح QR / باركود' : 'Scan QR / Barcode' }}">
+            <i class="bi bi-qr-code-scan"></i>
+          </button>
+        </div>
+
+        <!-- Barcode Mode -->
+        <div class="search-input-group barcode-active" *ngIf="barcodeMode">
+          <span class="search-icon"><i class="bi bi-upc-scan"></i></span>
+          <input id="barcodeInput" type="text" class="search-input"
+                 [placeholder]="i18n.lang === 'ar' ? 'امسح الباركود أو اكتب الرقم...' : 'Scan barcode or type number...'"
+                 (change)="onBarcodeInput($event)" />
+          <button class="qr-btn active" type="button" (click)="toggleBarcodeMode()">
+            <i class="bi bi-keyboard"></i>
+          </button>
+        </div>
+
+        <!-- Live Search Dropdown -->
+        <div class="search-dropdown" *ngIf="showSearchDropdown && !barcodeMode">
+          <div class="search-dropdown-item" *ngFor="let p of searchResults; let i = index"
+               (click)="goToProduct(p.id)" [class.selected]="isSelected(i)">
+            <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl"
+                 class="search-dropdown-img" alt="">
+            <div class="search-dropdown-info">
+              <div class="search-dropdown-name">{{ getProductName(p) }}</div>
+              <div class="search-dropdown-meta">{{ p.barcode || '-' }} — {{ p.finalPrice ?? p.price }} EGP</div>
+            </div>
+            <span class="stock-tag" [class.in]="p.stockQuantity > 0" [class.out]="p.stockQuantity === 0">
+              {{ p.stockQuantity > 0 ? (i18n.lang === 'ar' ? 'متوفر' : 'In Stock') : (i18n.lang === 'ar' ? 'نفذ' : 'Out') }}
+            </span>
+          </div>
+          <div *ngIf="searchResults.length" class="search-dropdown-all" (click)="submitSearch()">
+            <i class="bi bi-search"></i>
+            <span>{{ i18n.lang === 'ar' ? 'عرض كل النتائج عن' : 'View all results for' }} "{{ searchKeyword.trim() }}"</span>
+          </div>
+          <div *ngIf="!searchResults.length" class="search-dropdown-empty">
+            <i class="bi bi-search fs-3 text-muted"></i>
+            <span>{{ i18n.lang === 'ar' ? 'لا توجد نتائج' : 'No results' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-overlay" [class.open]="isMenuOpen" (click)="isMenuOpen = false"></div>
+  <div class="mobile-nav d-lg-none" [class.open]="isMenuOpen">
+    <div class="mobile-nav-header">
+      <span class="mobile-nav-brand">AL MADINA</span>
+      <button class="mobile-nav-close" (click)="isMenuOpen = false"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="mobile-nav-body">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+         class="mobile-nav-item" (click)="isMenuOpen = false">
+        <i class="bi bi-house"></i><span>{{ i18n.t('home') }}</span>
+      </a>
+      <a *ngIf="isAdmin" routerLink="/admin" routerLinkActive="active"
+         class="mobile-nav-item" (click)="isMenuOpen = false">
+        <i class="bi bi-speedometer2"></i><span>{{ i18n.t('admin') }}</span>
+      </a>
+      <a routerLink="/orders" routerLinkActive="active" class="mobile-nav-item"
+         *ngIf="isLoggedIn" (click)="isMenuOpen = false">
+        <i class="bi bi-box-seam"></i><span>{{ i18n.lang === 'ar' ? 'طلباتي' : 'My Orders' }}</span>
+      </a>
+      <a routerLink="/checkout" routerLinkActive="active" class="mobile-nav-item"
+         (click)="isMenuOpen = false">
+        <i class="bi bi-cart3"></i><span>{{ i18n.lang === 'ar' ? 'السلة' : 'Cart' }}</span>
+        <span class="badge bg-danger rounded-pill ms-auto" *ngIf="orderCount > 0">{{ orderCount }}</span>
+      </a>
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="mobile-nav-item" (click)="isMenuOpen = false">
+          <i class="bi bi-box-arrow-in-right"></i><span>{{ i18n.t('login') }}</span>
+        </a>
+      </ng-container>
+      <ng-container *ngIf="isLoggedIn">
+        <button class="mobile-nav-item" (click)="logout(); isMenuOpen = false">
+          <i class="bi bi-box-arrow-right"></i><span>{{ i18n.t('logout') }}</span>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</header>

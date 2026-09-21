@@ -1,0 +1,46 @@
+<div class="products-page container">
+  <div class="page-header-bar" *ngIf="categoryId">
+    <h1 class="page-title">{{ i18n.lang === 'ar' ? 'منتجات الفئة' : 'Category Products' }}</h1>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading && products.length === 0" class="products-grid">
+    <div *ngFor="let _ of [].constructor(8)" class="product-skeleton">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="products-grid" *ngIf="products.length > 0">
+    <article class="product-card" *ngFor="let p of products; trackBy: trackByProduct" (click)="goToProduct(p.id)">
+      <div class="product-image-wrap">
+        <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" alt="" loading="lazy">
+        <div *ngIf="!p.imageUrl" class="product-image-placeholder"><i class="bi bi-image"></i></div>
+        <span *ngIf="p.discountPercentage" class="product-badge">-{{ p.discountPercentage }}%</span>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ getProductName(p) }}</h3>
+        <div class="product-price">{{ p.finalPrice ?? p.price }} <span class="currency">EGP</span></div>
+        <div class="old-price" *ngIf="p.finalPrice && p.finalPrice < p.price">{{ p.price }} EGP</div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && products.length === 0" class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد منتجات في هذه الفئة.' : 'No products in this category.' }}</p>
+  </div>
+
+  <!-- Load More -->
+  <div class="text-center mt-4" *ngIf="hasMore && products.length > 0">
+    <button class="btn-load-more" (click)="loadProducts()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+      {{ i18n.lang === 'ar' ? 'تحميل المزيد' : 'Load More' }}
+    </button>
+  </div>
+</div>

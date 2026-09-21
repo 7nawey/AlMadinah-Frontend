@@ -1,0 +1,108 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.t('categories') }}</h4>
+  <button class="btn btn-gradient" (click)="openAdd()">
+    <span class="btn-icon-inner">+</span> {{ i18n.t('addCategory') }}
+  </button>
+</div>
+
+<!-- Category Form -->
+<div class="card-modern form-card" *ngIf="showForm">
+  <div class="card-body p-4">
+    <div class="form-card-header">
+      <h6 class="form-card-title">{{ editing ? i18n.t('editCategory') : i18n.t('addCategory') }}</h6>
+      <button class="btn-close" (click)="showForm = false"></button>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">{{ i18n.t('categoryName') }}</label>
+        <input class="form-control form-control-modern" [(ngModel)]="form.nameAr" (input)="onNameArChange()" />
+        <div *ngIf="nameEnSuggestion" class="suggestion-badge mt-1">
+          <span class="text-muted small">{{ i18n.lang === 'ar' ? 'اقتراح:' : 'Suggestion:' }} {{ nameEnSuggestion }}</span>
+          <button class="btn btn-sm btn-link p-0 ms-1" (click)="applySuggestion('en')">{{ i18n.lang === 'ar' ? 'استخدام' : 'Use' }}</button>
+          <button class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="clearSuggestion('en')">{{ i18n.lang === 'ar' ? 'تجاهل' : 'Dismiss' }}</button>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label fw-semibold">{{ i18n.t('categoryNameEn') }}</label>
+        <input class="form-control form-control-modern" [(ngModel)]="form.nameEn" (input)="onNameEnChange()" />
+        <div *ngIf="nameArSuggestion" class="suggestion-badge mt-1">
+          <span class="text-muted small">{{ i18n.lang === 'ar' ? 'اقتراح:' : 'Suggestion:' }} {{ nameArSuggestion }}</span>
+          <button class="btn btn-sm btn-link p-0 ms-1" (click)="applySuggestion('ar')">{{ i18n.lang === 'ar' ? 'استخدام' : 'Use' }}</button>
+          <button class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="clearSuggestion('ar')">{{ i18n.lang === 'ar' ? 'تجاهل' : 'Dismiss' }}</button>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الصورة' : 'Image' }}</label>
+        <input type="file" class="form-control form-control-modern" accept="image/*" (change)="onImageChange($event)" />
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">{{ i18n.t('description') }}</label>
+        <textarea class="form-control form-control-modern" rows="2" [(ngModel)]="form.description"></textarea>
+      </div>
+      <!-- Image Preview -->
+      <div class="col-12" *ngIf="imagePreview || existingImageUrl">
+        <div class="image-preview-wrapper">
+          <img [src]="imagePreview || ('https://localhost:7178' + existingImageUrl!)" class="image-preview" alt="Preview">
+          <button class="btn btn-sm btn-danger remove-image-btn" (click)="removeImage()">×</button>
+        </div>
+      </div>
+      <div class="col-12 form-actions">
+        <button class="btn btn-success" (click)="save()">{{ i18n.t('save') }}</button>
+        <button class="btn btn-outline-secondary ms-2" (click)="showForm = false">{{ i18n.t('cancel') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Categories Table -->
+<div class="card-modern">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:60px">#</th>
+            <th style="width:70px">{{ i18n.lang === 'ar' ? 'الصورة' : 'Image' }}</th>
+            <th>{{ i18n.t('categoryName') }}</th>
+            <th>{{ i18n.t('description') }}</th>
+            <th style="width:180px">{{ i18n.t('actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of categories; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td>
+              <div class="cat-thumb-wrapper">
+                <img *ngIf="c.imageUrl" [src]="'https://localhost:7178' + c.imageUrl" class="cat-thumb" />
+                <div *ngIf="!c.imageUrl" class="cat-thumb-placeholder">
+                  <i class="bi bi-image"></i>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="fw-semibold">{{ c.nameAr }}</div>
+              <div class="text-muted small">{{ c.nameEn }}</div>
+            </td>
+            <td class="text-muted">{{ c.description || '-' }}</td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action-labeled btn-action-edit-labeled" (click)="edit(c)" title="{{ i18n.t('edit') }}">
+                  <i class="bi bi-pencil"></i><span class="btn-label">{{ i18n.t('edit') }}</span>
+                </button>
+                <button class="btn-action-labeled btn-action-delete-labeled" (click)="delete(c.id)" title="{{ i18n.t('delete') }}">
+                  <i class="bi bi-trash"></i><span class="btn-label">{{ i18n.t('delete') }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !categories.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.t('noCategories') }}</p>
+    </div>
+  </div>
+</div>

@@ -1,59 +1,104 @@
-# AlMadinahAlMunawwarah
+# Al-Madinah Al-Munawwarah — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.9.
+<div dir="rtl">
 
-## Development server
+واجهة المستخدم لمنصة **المدينة المنورة** للتجارة الإلكترونية — مبنية بـ **Angular 19** مع دعم كامل للغتين العربية والإنجليزية (RTL / LTR).
 
-To start a local development server, run:
+</div>
 
-```bash
-ng serve
+Customer-facing storefront + admin dashboard for the Al-Madinah e-commerce platform, built with **Angular 19** and **Bootstrap 5**, with bilingual (Arabic / English) support.
+
+---
+
+## ✨ Features
+
+- 🏠 **Home Page** — featured products, deals & categories
+- 🛍️ **Product Catalog** — browsing, filtering, product details & search
+- 🔍 **Search** — live search results page
+- 🛒 **Checkout** — full checkout flow integrated with Paymob payments
+- 💳 **Payment** — card & mobile-wallet payment pages
+- 📦 **Orders** — order history & tracking for customers
+- 🔐 **Auth** — register / login with JWT handling
+- 🛠️ **Admin Dashboard** — manage products, categories, orders, stock, returns, deals & users
+- 🌐 **i18n** — Arabic / English localization with RTL support
+
+## 🛠️ Tech Stack
+
+| Technology | Usage |
+|---|---|
+| Angular 19 (standalone components) | Framework |
+| TypeScript 5.7 | Language |
+| Bootstrap 5 + Angular CDK | UI & styling |
+| RxJS | Reactive state & HTTP |
+| Karma + Jasmine | Unit testing |
+
+## 📁 Project Structure
+
+```
+src/app/
+├── core/                  # Singleton services & app-wide logic
+│   ├── i18n/              # Translation service (AR / EN)
+│   └── services/          # API service (HTTP layer)
+├── features/              # Feature modules (one folder per page/area)
+│   ├── home/              # Landing page
+│   ├── products/          # Product listing
+│   ├── product-detail/    # Single product view
+│   ├── search-results/    # Search page
+│   ├── checkout/          # Checkout flow
+│   ├── payment/           # Paymob payment pages
+│   ├── orders/            # Customer orders
+│   ├── auth/              # Login & registration
+│   └── admin/             # Admin dashboard (layout, shell, management pages)
+├── layout/                # Shared layout (header, footer, ...)
+└── shared/                # Reusable components, pipes & helpers
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🚀 Getting Started
 
-## Code scaffolding
+### Prerequisites
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- Angular CLI: `npm install -g @angular/cli`
+- The backend API running — see [7nawey/AlMadinah-Backend](https://github.com/7nawey/AlMadinah-Backend)
 
-```bash
-ng generate component component-name
-```
+### Setup
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+1. **Clone the repository**
 
-```bash
-ng generate --help
-```
+   ```bash
+   git clone https://github.com/7nawey/AlMadinah-Frontend.git
+   cd AlMadinah-Frontend
+   ```
 
-## Building
+2. **Install dependencies**
 
-To build the project run:
+   ```bash
+   npm install
+   ```
 
-```bash
-ng build
-```
+3. **Configure the API URL** — point the API service to your running backend (default: `https://localhost:<port>/api`).
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+4. **Start the dev server**
 
-## Running unit tests
+   ```bash
+   ng serve
+   ```
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+   Open `http://localhost:4200/` — the app reloads automatically on file changes.
 
-```bash
-ng test
-```
+## 📜 Available Scripts
 
-## Running end-to-end tests
+| Command | Description |
+|---|---|
+| `ng serve` / `npm start` | Dev server on `http://localhost:4200/` |
+| `ng build` / `npm run build` | Production build → `dist/` |
+| `ng test` / `npm test` | Run unit tests (Karma + Jasmine) |
+| `ng generate component <name>` | Scaffold a new component |
 
-For end-to-end (e2e) testing, run:
+## 🔗 Related Repositories
 
-```bash
-ng e2e
-```
+- **Backend (.NET 8 API):** [7nawey/AlMadinah-Backend](https://github.com/7nawey/AlMadinah-Backend)
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## 👤 Author
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+**Mohamed Emad Elhnawey** — [GitHub @7nawey](https://github.com/7nawey)

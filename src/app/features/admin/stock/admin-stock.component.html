@@ -1,0 +1,179 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.lang === 'ar' ? 'حركات المخزون (شراء)' : 'Stock Movements (Purchasing)' }}</h4>
+  <div class="page-header-actions">
+    <button class="btn btn-gradient" (click)="openAddExisting()">
+      <span class="btn-icon-inner">+</span> {{ i18n.lang === 'ar' ? 'شراء موجود' : 'Purchase Existing' }}
+    </button>
+    <button class="btn btn-modern btn-modern-success" (click)="openAddNew()">
+      <span class="btn-icon-inner">+</span> {{ i18n.lang === 'ar' ? 'منتج + شراء' : 'New Product + Purchase' }}
+    </button>
+  </div>
+</div>
+
+<!-- Purchase Form -->
+<div class="card-modern form-card" *ngIf="showForm">
+  <div class="card-header">
+    <span class="card-header-title">{{ mode === 'existing' ? (i18n.lang === 'ar' ? 'شراء منتج موجود' : 'Purchase Existing Product') : (i18n.lang === 'ar' ? 'إنشاء منتج جديد وشراء' : 'Create New Product & Purchase') }}</span>
+    <button class="btn-close" (click)="closeForm()"></button>
+  </div>
+  <div class="card-body p-4">
+    <!-- Barcode Scan -->
+    <div class="mb-3" *ngIf="mode === 'existing'">
+      <label class="form-label barcode-label">{{ i18n.lang === 'ar' ? 'مسح الباركود' : 'Barcode Scan' }}</label>
+      <input type="text" class="form-control form-control-modern barcode-input" [(ngModel)]="barcodeScan" (change)="onBarcodeScan($event)" [placeholder]="i18n.lang === 'ar' ? 'امسح الباركود...' : 'Scan barcode...'" />
+    </div>
+
+    <!-- Existing Product Selection -->
+    <div *ngIf="mode === 'existing'" class="mb-3 product-select-section">
+      <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</label>
+      <div class="position-relative">
+        <input type="text" class="form-control form-control-modern" [(ngModel)]="productSearch" (input)="onProductSearch()" [placeholder]="i18n.lang === 'ar' ? 'ابحث بالاسم أو الباركود...' : 'Search by name or barcode...'" />
+        <div class="product-dropdown" *ngIf="showProductPicker && filteredProducts.length">
+          <div class="product-dropdown-item" *ngFor="let p of filteredProducts" (click)="selectProduct(p)">
+            <img *ngIf="p.imageUrl" [src]="'https://localhost:7178' + p.imageUrl" class="dropdown-img" alt="">
+            <div class="dropdown-info">
+              <div class="fw-bold">{{ i18n.lang === 'en' ? (p.nameEn || p.nameAr) : p.nameAr }}</div>
+              <div class="text-muted small">{{ p.barcode || '-' }} — {{ p.price }} EGP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="existingForm.productId" class="selected-product-alert">
+        {{ i18n.lang === 'ar' ? 'المنتج المحدد:' : 'Selected:' }} {{ getSelectedProductName() }}
+      </div>
+    </div>
+
+    <!-- New Product Fields -->
+    <div *ngIf="mode === 'new'" class="form-section">
+      <div class="form-section-label">{{ i18n.lang === 'ar' ? 'معلومات المنتج' : 'Product Information' }}</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الاسم (عربي)' : 'Name (Arabic)' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.nameAr" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الاسم (إنجليزي)' : 'Name (English)' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.nameEn" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الباركود' : 'Barcode' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.barcode" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'سعر البيع' : 'Sale Price' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="newProductForm.price" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'سعر التكلفة' : 'Cost Price' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="newProductForm.costPrice" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'التصنيف' : 'Category' }}</label>
+          <select class="form-select form-control-modern" [(ngModel)]="newProductForm.categoryId">
+            <option value="">--</option>
+            <option *ngFor="let c of categories" [value]="c.id">{{ c.nameAr }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الوصف' : 'Description' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.description" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Details -->
+    <div class="form-section form-section-last">
+      <div class="form-section-label">{{ i18n.lang === 'ar' ? 'تفاصيل الشراء' : 'Purchase Details' }}</div>
+      <div class="row g-3" *ngIf="mode === 'existing'">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الكمية' : 'Qty' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="existingForm.quantity" min="1" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'تكلفة الوحدة' : 'Unit Cost' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="existingForm.unitCost" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'المورد' : 'Supplier' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="existingForm.supplier" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الإجمالي' : 'Total' }}</label>
+          <div class="total-cost-display">{{ getTotalCost() }} EGP</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'ملاحظات' : 'Notes' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="existingForm.notes" />
+        </div>
+      </div>
+
+      <div class="row g-3" *ngIf="mode === 'new'">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الكمية' : 'Qty' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="newProductForm.initialStock" min="1" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'تكلفة الوحدة' : 'Unit Cost' }}</label>
+          <input type="number" class="form-control form-control-modern" [(ngModel)]="newProductForm.unitCost" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'المورد' : 'Supplier' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.supplier" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'الإجمالي' : 'Total' }}</label>
+          <div class="total-cost-display">{{ getTotalCost() }} EGP</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'ملاحظات' : 'Notes' }}</label>
+          <input class="form-control form-control-modern" [(ngModel)]="newProductForm.notes" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-success" (click)="mode === 'existing' ? saveExisting() : saveNewProduct()">{{ i18n.t('save') }}</button>
+      <button class="btn btn-outline-secondary ms-2" (click)="closeForm()">{{ i18n.t('cancel') }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Movements List -->
+<div class="card-modern">
+  <div class="card-header">
+    <span class="card-header-title">{{ i18n.lang === 'ar' ? 'سجل الحركات' : 'Movement History' }}</span>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'الكمية' : 'Quantity' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'التكلفة' : 'Cost' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'المورد' : 'Supplier' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'النوع' : 'Type' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'التاريخ' : 'Date' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of movements; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td class="fw-semibold">{{ m.productName }}</td>
+            <td>{{ m.quantity }}</td>
+            <td class="fw-bold price-cell">{{ m.totalCost ?? '-' }} EGP</td>
+            <td class="text-muted">{{ m.supplier ?? '-' }}</td>
+            <td><span class="movement-type-badge">{{ m.type }}</span></td>
+            <td class="text-muted">{{ m.date | date:'short' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !movements.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.lang === 'ar' ? 'لا توجد حركات.' : 'No movements.' }}</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<div class="container-centered py-4">
+  <h3 class="mb-3 page-title">{{ i18n.lang === 'ar' ? 'طلباتي' : 'My Orders' }}</h3>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">{{ i18n.t('loading') }}</p>
+  </div>
+
+  <div *ngIf="!loading && orders.length === 0" class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <p>{{ i18n.lang === 'ar' ? 'لا توجد طلبات حتى الآن.' : 'No orders yet.' }}</p>
+  </div>
+
+  <div class="order-list" *ngIf="!loading && orders.length > 0">
+    <div class="order-card" *ngFor="let order of orders" (click)="selectOrder(order)">
+      <div class="order-card-header">
+        <div class="order-card-meta">
+          <div class="order-id">#{{ order.id }}</div>
+          <div class="order-date">{{ order.createdAt | date:'medium' }}</div>
+        </div>
+        <div class="order-card-badges">
+          <span class="status-badge" [ngClass]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+          <div class="order-type">{{ typeLabel(order.type) }}</div>
+        </div>
+        <div class="order-card-total">
+          <div class="order-price">{{ order.totalPrice }} EGP</div>
+          <div class="order-items-count">{{ order.items.length }} {{ i18n.lang === 'ar' ? 'منتج' : 'items' }}</div>
+        </div>
+      </div>
+
+      <!-- Order Details -->
+      <div *ngIf="selectedOrder?.id === order.id" class="order-details">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h6 class="fw-bold mb-2">{{ i18n.lang === 'ar' ? 'تفاصيل الطلب' : 'Order Details' }}</h6>
+            <table class="table-sm table-borderless">
+              <tbody>
+                <tr><td class="text-muted">{{ i18n.t('phone') }}</td><td>{{ order.customerPhone }}</td></tr>
+                <tr><td class="text-muted">{{ i18n.t('address') }}</td><td>{{ order.customerAddress }}</td></tr>
+                <tr><td class="text-muted">{{ i18n.t('deliveryFee') }}</td><td>{{ order.deliveryFee }} EGP</td></tr>
+                <tr *ngIf="order.notes"><td class="text-muted">{{ i18n.t('notes') }}</td><td>{{ order.notes }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold mb-2">{{ i18n.lang === 'ar' ? 'المنتجات' : 'Items' }}</h6>
+            <table class="table-sm table-modern">
+              <thead>
+                <tr>
+                  <th>{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</th>
+                  <th>{{ i18n.t('quantity') }}</th>
+                  <th>{{ i18n.t('price') }}</th>
+                  <th>{{ i18n.t('total') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.items">
+                  <td>{{ item.productName }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.unitPrice }} EGP</td>
+                  <td>{{ item.totalPrice }} EGP</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

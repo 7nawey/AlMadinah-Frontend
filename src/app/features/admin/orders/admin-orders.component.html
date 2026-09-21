@@ -1,0 +1,171 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.t('orders') }}</h4>
+  <a routerLink="/admin/orders/create" class="btn btn-gradient">
+    <span class="btn-icon-inner">+</span> {{ i18n.t('createOrder') }}
+  </a>
+</div>
+
+<!-- Orders Table -->
+<div class="card-modern">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>{{ i18n.t('orderNumber') }}</th>
+            <th>{{ i18n.t('customer') }} / {{ i18n.t('phone') }}</th>
+            <th>{{ i18n.t('type') }}</th>
+            <th>{{ i18n.t('payment') }}</th>
+            <th>{{ i18n.t('total') }}</th>
+            <th>{{ i18n.t('status') }}</th>
+            <th style="width:240px">{{ i18n.t('actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td>
+              <div class="font-monospace fw-semibold text-primary">#{{ o.id | slice:0:6 }}</div>
+            </td>
+            <td>
+              <div *ngIf="o.isInStore" class="fw-semibold">{{ i18n.t('store') }}</div>
+              <div class="text-muted small" *ngIf="o.isInStore">{{ o.customerAddress | slice:0:25 }}</div>
+              <div class="font-monospace" *ngIf="!o.isInStore">{{ o.customerPhone }}</div>
+            </td>
+            <td>
+              <span class="status-badge" [class.status-info]="o.isInStore" [class.status-processing]="!o.isInStore">
+                {{ typeLabel(o.isInStore) }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.status-paid]="o.isPaid" [class.status-cancelled]="!o.isPaid">
+                {{ paymentLabel(o) }}
+              </span>
+            </td>
+            <td class="fw-bold price-cell">{{ o.totalPrice }} EGP</td>
+            <td>
+              <span class="status-badge" [class]="'status-' + statusLabel(o.status).toLowerCase().replace(' ', '-')">
+                {{ statusLabel(o.status) }}
+              </span>
+            </td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action-labeled btn-action-view-labeled" (click)="viewOrder(o)" title="{{ i18n.t('details') }}">
+                  <i class="bi bi-eye"></i><span class="btn-label">{{ i18n.t('details') }}</span>
+                </button>
+
+                <button *ngIf="canConfirmPayment(o)" class="btn-action-labeled btn-action-paid-labeled" (click)="confirmPayment(o)" title="{{ i18n.t('confirmPayment') }}">
+                  <i class="bi bi-check-circle"></i><span class="btn-label">{{ i18n.t('confirmPayment') }}</span>
+                </button>
+
+                <button *ngIf="canProcess(o)" class="btn-action-labeled btn-action-process-labeled" (click)="processOrder(o)" title="{{ i18n.t('processOrder') }}">
+                  <i class="bi bi-gear"></i><span class="btn-label">{{ i18n.t('processOrder') }}</span>
+                </button>
+
+                <button *ngIf="canDeliver(o)" class="btn-action-labeled btn-action-process-labeled" (click)="markDelivered(o)" title="{{ i18n.t('markDelivered') }}">
+                  <i class="bi bi-truck"></i><span class="btn-label">{{ i18n.t('markDelivered') }}</span>
+                </button>
+
+                <button *ngIf="canReturn(o)" class="btn-action-labeled btn-action-view-labeled" (click)="goToReturns()" title="{{ i18n.t('return') }}">
+                  <i class="bi bi-arrow-counterclockwise"></i><span class="btn-label">{{ i18n.t('return') }}</span>
+                </button>
+
+                <button *ngIf="canCancel(o)" class="btn-action-labeled btn-action-delete-labeled" (click)="cancelOrder(o)" title="{{ i18n.t('cancel') }}">
+                  <i class="bi bi-x-circle"></i><span class="btn-label">{{ i18n.t('cancel') }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !orders.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.t('noOrders') }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal-backdrop" *ngIf="selectedOrder" (click)="closeDetails()"></div>
+<div class="modal-content-wrapper" *ngIf="selectedOrder">
+  <div class="card-modern modal-card">
+    <div class="card-header">
+      <span class="card-header-title text-primary">{{ i18n.t('orderDetails') }}: #{{ selectedOrder.id | slice:0:8 }}</span>
+      <button class="btn-close" (click)="closeDetails()"></button>
+    </div>
+    <div class="card-body">
+      <div class="order-details-grid">
+        <div class="order-detail-item">
+          <p class="order-detail-label">{{ i18n.t('type') }}</p>
+          <p class="order-detail-value">{{ typeLabel(selectedOrder.isInStore) }}</p>
+        </div>
+        <div class="order-detail-item">
+          <p class="order-detail-label">{{ i18n.t('payment') }}</p>
+          <p class="order-detail-value">{{ paymentLabel(selectedOrder) }}</p>
+        </div>
+        <div class="order-detail-item">
+          <p class="order-detail-label">{{ i18n.t('status') }}</p>
+          <p class="order-detail-value">{{ statusLabel(selectedOrder.status) }}</p>
+        </div>
+        <div class="order-detail-item">
+          <p class="order-detail-label">{{ i18n.t('date') }}</p>
+          <p class="order-detail-value">{{ selectedOrder.createdAt | date:'medium' }}</p>
+        </div>
+        <div class="order-detail-item" *ngIf="!selectedOrder.isInStore">
+          <p class="order-detail-label">{{ i18n.t('phone') }}</p>
+          <p class="order-detail-value">{{ selectedOrder.customerPhone }}</p>
+        </div>
+        <div class="order-detail-item order-detail-full">
+          <p class="order-detail-label">{{ i18n.t('address') }}</p>
+          <p class="order-detail-value">{{ selectedOrder.customerAddress }}</p>
+        </div>
+        <div class="order-detail-item order-detail-full">
+          <p class="order-detail-label">{{ i18n.t('notes') }}</p>
+          <p class="order-detail-value text-muted">{{ selectedOrder.notes || '-' }}</p>
+        </div>
+      </div>
+
+      <div class="order-products-section">
+        <h6 class="section-subtitle">{{ i18n.t('products') }}</h6>
+        <div class="table-responsive">
+          <table class="table-modern mb-0">
+            <thead>
+              <tr>
+                <th>{{ i18n.t('product') }}</th>
+                <th>{{ i18n.t('quantity') }}</th>
+                <th>{{ i18n.t('unitPrice') }}</th>
+                <th>{{ i18n.t('itemTotal') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td>{{ item.productName }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unitPrice }} EGP</td>
+                <td class="fw-bold">{{ item.totalPrice }} EGP</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="order-summary-section">
+        <div class="d-flex justify-content-between">
+          <span>{{ i18n.t('subtotal') }}</span>
+          <span>{{ getSubtotal(selectedOrder) }} EGP</span>
+        </div>
+        <div class="d-flex justify-content-between text-muted">
+          <span>{{ i18n.t('deliveryFee') }}</span>
+          <span>{{ selectedOrder.deliveryFee }} EGP</span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold fs-5 text-primary">
+          <span>{{ i18n.t('finalTotal') }}</span>
+          <span>{{ selectedOrder.totalPrice }} EGP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

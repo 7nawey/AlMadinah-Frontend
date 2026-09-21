@@ -1,0 +1,103 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.lang === 'ar' ? 'العروض' : 'Deals' }}</h4>
+  <button class="btn btn-gradient" (click)="openAdd()">
+    <span class="btn-icon-inner">+</span> {{ i18n.lang === 'ar' ? 'عرض جديد' : 'New Deal' }}
+  </button>
+</div>
+
+<!-- Deal Form -->
+<div class="card-modern form-card" *ngIf="showForm">
+  <div class="card-body p-4">
+    <div class="form-card-header">
+      <h6 class="form-card-title">{{ editing ? (i18n.lang === 'ar' ? 'تعديل عرض' : 'Edit Deal') : (i18n.lang === 'ar' ? 'عرض جديد' : 'New Deal') }}</h6>
+      <button class="btn-close" (click)="showForm = false"></button>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</label>
+        <select class="form-select form-control-modern" [(ngModel)]="form.productId" (ngModelChange)="onProductChange()">
+          <option *ngFor="let p of products" [value]="p.id">{{ p.nameAr }}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'السعر الأصلي' : 'Original Price' }}</label>
+        <input type="number" class="form-control form-control-modern" [(ngModel)]="form.originalPrice" readonly />
+        <small class="text-muted">{{ i18n.lang === 'ar' ? 'يُجلب تلقائياً من المنتج' : 'Auto-filled from the product' }}</small>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'السعر المخفض' : 'Discounted Price' }}</label>
+        <input type="number" class="form-control form-control-modern" [(ngModel)]="form.discountedPrice" (ngModelChange)="recalculateFromDiscounted()" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'نسبة الخصم' : 'Discount %' }}</label>
+        <input type="number" class="form-control form-control-modern" [(ngModel)]="form.discountPercentage" (ngModelChange)="recalculateFromPercentage()" min="0" max="100" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'تاريخ البدء (اختياري)' : 'Start Date (optional)' }}</label>
+        <input type="date" class="form-control form-control-modern" [(ngModel)]="form.startDate" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">{{ i18n.lang === 'ar' ? 'تاريخ الانتهاء (اختياري)' : 'End Date (optional)' }}</label>
+        <input type="date" class="form-control form-control-modern" [(ngModel)]="form.endDate" />
+      </div>
+      <div class="col-12 form-actions">
+        <button class="btn btn-success" (click)="save()">{{ i18n.t('save') }}</button>
+        <button class="btn btn-outline-secondary ms-2" (click)="showForm = false">{{ i18n.t('cancel') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Deals Table -->
+<div class="card-modern">
+  <div class="card-header">
+    <span class="card-header-title">{{ i18n.lang === 'ar' ? 'العروض النشطة' : 'Active Deals' }}</span>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>{{ i18n.lang === 'ar' ? 'المنتج' : 'Product' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'السعر الأصلي' : 'Original' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'السعر المخفض' : 'Discounted' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'الحالة' : 'Status' }}</th>
+            <th style="width:200px">{{ i18n.lang === 'ar' ? 'إجراءات' : 'Actions' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let deal of deals; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td class="fw-semibold">{{ deal.productName }}</td>
+            <td class="text-muted original-price">{{ deal.originalPrice }} EGP</td>
+            <td class="fw-bold price-cell">{{ deal.discountedPrice }} EGP</td>
+            <td>
+              <span class="status-badge" [class.status-paid]="deal.isActive && !deal.isExpired" [class.status-failed]="!deal.isActive || deal.isExpired">
+                {{ deal.isActive && !deal.isExpired ? (i18n.lang === 'ar' ? 'نشط' : 'Active') : (i18n.lang === 'ar' ? 'غير نشط' : 'Inactive') }}
+              </span>
+            </td>
+            <td>
+              <div class="action-group">
+                <button class="btn-action-labeled btn-action-edit-labeled" (click)="edit(deal)" title="{{ i18n.t('edit') }}">
+                  <i class="bi bi-pencil"></i><span class="btn-label">{{ i18n.t('edit') }}</span>
+                </button>
+                <button class="btn-action-labeled btn-action-toggle-labeled" (click)="toggleActive(deal)" title="{{ i18n.lang === 'ar' ? 'تفعيل' : 'Toggle' }}">
+                  <i class="bi bi-toggle-on"></i><span class="btn-label">{{ i18n.lang === 'ar' ? 'تفعيل' : 'Toggle' }}</span>
+                </button>
+                <button class="btn-action-labeled btn-action-delete-labeled" (click)="deleteDeal(deal.id)" title="{{ i18n.t('delete') }}">
+                  <i class="bi bi-trash"></i><span class="btn-label">{{ i18n.t('delete') }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !deals.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.lang === 'ar' ? 'لا توجد عروض.' : 'No deals.' }}</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,96 @@
+<!-- Page Header -->
+<div class="page-header">
+  <h4 class="page-title">{{ i18n.lang === 'ar' ? 'إدارة المستخدمين' : 'User Management' }}</h4>
+</div>
+
+<!-- Users Table -->
+<div class="card-modern">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern mb-0">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>{{ i18n.lang === 'ar' ? 'الاسم' : 'Name' }}</th>
+            <th>Email</th>
+            <th>{{ i18n.lang === 'ar' ? 'الدور' : 'Role' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'الحالة' : 'Status' }}</th>
+            <th>{{ i18n.lang === 'ar' ? 'الطلبات' : 'Orders' }}</th>
+            <th style="width:240px">{{ i18n.lang === 'ar' ? 'إجراءات' : 'Actions' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let i = index">
+            <td><span class="row-num">{{ i + 1 }}</span></td>
+            <td>
+              <div class="fw-semibold">{{ user.fullName }}</div>
+            </td>
+            <td class="text-muted">{{ user.email }}</td>
+            <td><span class="user-role-badge">{{ user.role }}</span></td>
+            <td>
+              <span class="status-badge" [class.status-failed]="user.isBlocked" [class.status-pending]="user.isFlagged && !user.isBlocked" [class.status-paid]="!user.isBlocked && !user.isFlagged">
+                {{ user.isBlocked ? (i18n.lang === 'ar' ? 'محظور' : 'Blocked') : user.isFlagged ? (i18n.lang === 'ar' ? 'محذّر' : 'Flagged') : (i18n.lang === 'ar' ? 'نشط' : 'Active') }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action-labeled btn-action-view-labeled" (click)="viewOrders(user)" title="{{ i18n.t('view') }}">
+                <i class="bi bi-eye"></i><span class="btn-label">{{ i18n.t('view') }}</span>
+              </button>
+            </td>
+            <td>
+              <div class="user-actions">
+                <button class="btn-action-labeled" [class.btn-action-delete-labeled]="!user.isBlocked" [class.btn-action-process-labeled]="user.isBlocked" (click)="toggleBlock(user)" title="{{ user.isBlocked ? (i18n.lang === 'ar' ? 'إلغاء الحظر' : 'Unblock') : (i18n.lang === 'ar' ? 'حظر' : 'Block') }}">
+                  <i class="bi" [class.bi-lock]="!user.isBlocked" [class.bi-unlock]="user.isBlocked"></i>
+                  <span class="btn-label">{{ user.isBlocked ? (i18n.lang === 'ar' ? 'إلغاء الحظر' : 'Unblock') : (i18n.lang === 'ar' ? 'حظر' : 'Block') }}</span>
+                </button>
+                <button class="btn-action-labeled" [class.btn-action-toggle-labeled]="!user.isFlagged" [class.btn-action-view-labeled]="user.isFlagged" (click)="toggleFlag(user)" title="{{ user.isFlagged ? (i18n.lang === 'ar' ? 'إلغاء التحذير' : 'Unflag') : (i18n.lang === 'ar' ? 'تحذير' : 'Flag') }}">
+                  <i class="bi" [class.bi-flag]="!user.isFlagged" [class.bi-flag-fill]="user.isFlagged"></i>
+                  <span class="btn-label">{{ user.isFlagged ? (i18n.lang === 'ar' ? 'إلغاء التحذير' : 'Unflag') : (i18n.lang === 'ar' ? 'تحذير' : 'Flag') }}</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && !users.length" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <p>{{ i18n.lang === 'ar' ? 'لا يوجد مستخدمين.' : 'No users.' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Orders Modal -->
+<div class="modal-backdrop" *ngIf="showOrders" (click)="closeOrders()"></div>
+<div class="modal-content-wrapper" *ngIf="showOrders">
+  <div class="card-modern modal-card">
+    <div class="card-header">
+      <span class="card-header-title">{{ selectedUser?.fullName }} — {{ i18n.lang === 'ar' ? 'الطلبات' : 'Orders' }}</span>
+      <button class="btn-close" (click)="closeOrders()"></button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table-modern mb-0">
+          <thead>
+            <tr>
+              <th>{{ i18n.t('orderId') }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'الإجمالي' : 'Total' }}</th>
+              <th>{{ i18n.lang === 'ar' ? 'الحالة' : 'Status' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of userOrders">
+              <td><span class="font-monospace text-primary">#{{ o.id | slice:0:8 }}</span></td>
+              <td class="fw-semibold">{{ o.totalPrice }} EGP</td>
+              <td><span class="status-badge" [class]="'status-' + statusLabel(o.status).toLowerCase().replace(' ', '-')">{{ statusLabel(o.status) }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="!userOrders.length" class="empty-state">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-2">{{ i18n.lang === 'ar' ? 'لا توجد طلبات.' : 'No orders.' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
